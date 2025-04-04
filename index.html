@@ -6,97 +6,87 @@
     <title>Math Practice App</title>
     <style>
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f2f5;
+            font-family: Arial, sans-serif;
+            background: #f4f4f9;
+            color: #333;
+            text-align: center;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
+            justify-content: center;
+            height: 100vh;
         }
 
         .problem-container {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-bottom: 20px;
         }
 
         .problem {
-            font-size: 2.5em;
-            margin: 20px 0;
-            color: #2d3436;
-            font-weight: 300;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        #answer {
-            font-size: 1.2em;
-            padding: 12px 20px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            width: 150px;
-            margin: 15px 0;
-            transition: border-color 0.3s ease;
-        }
-
-        #answer:focus {
-            outline: none;
-            border-color: #6c5ce7;
+        input {
+            width: 100%;
+            padding: 8px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
         }
 
         button {
-            background-color: #6c5ce7;
+            background: #28a745;
             color: white;
             border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-size: 1em;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
             cursor: pointer;
-            transition: transform 0.2s ease, background-color 0.3s ease;
-            margin: 5px;
+            width: 100%;
         }
 
         button:hover {
-            background-color: #5b4bc4;
-            transform: translateY(-2px);
+            background: #218838;
         }
 
         .result {
-            font-size: 1.1em;
-            margin: 15px 0;
-            padding: 10px;
-            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 18px;
+            font-weight: bold;
         }
 
         .correct {
-            background-color: #d4edda;
-            color: #155724;
+            color: #28a745;
         }
 
         .incorrect {
-            background-color: #f8d7da;
-            color: #721c24;
+            color: #dc3545;
         }
 
         .history-container {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            margin-top: 10px;
+            max-height: 250px;
+            overflow-y: auto;
         }
 
         .history-title {
-            color: #2d3436;
-            margin-bottom: 15px;
-            font-size: 1.3em;
+            font-size: 20px;
+            margin-bottom: 10px;
         }
 
         .history-list {
@@ -106,40 +96,27 @@
         }
 
         .history-item {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+            font-size: 16px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-
-        .history-problem {
-            color: #636e72;
-            font-weight: bold;
-        }
-
-        .history-answer {
-            color: #2d3436;
-            margin: 0 10px;
         }
 
         .history-correct {
-            color: #2ecc71;
+            color: #28a745;
             font-weight: bold;
         }
 
         .history-incorrect {
-            color: #e74c3c;
+            color: #dc3545;
             font-weight: bold;
         }
 
-        @media (max-width: 480px) {
-            .problem {
-                font-size: 2em;
-            }
-            
-            .problem-container {
-                padding: 20px;
+        @media (max-width: 400px) {
+            .problem-container,
+            .history-container {
+                width: 90%;
             }
         }
     </style>
@@ -156,7 +133,7 @@
         <p class="result" id="result"></p>
     </div>
 
-    <button onclick="nextProblem()">Next Problem</button>
+    <button onclick="nextProblem()" style="margin-bottom: 10px;">Next Problem</button>
 
     <div class="history-container">
         <h2 class="history-title">Last Answers</h2>
@@ -182,7 +159,7 @@
             currentNum1 = Math.floor(Math.random() * 99) + 1;
             currentNum2 = Math.floor(Math.random() * 99) + 1;
             const operators = ['+', '-'];
-            currentOperator = operators[(Math.floor(Math.random() * operators.length))];
+            currentOperator = operators[Math.floor(Math.random() * operators.length)];
 
             num1Element.textContent = currentNum1;
             operatorElement.textContent = currentOperator;
@@ -231,7 +208,30 @@
         }
 
         function nextProblem() {
-            generateProblem();
+            const userAnswer = answerInput.value.trim();
+            
+            if (userAnswer === '') {
+                resultDisplay.textContent = "No answer provided!";
+                resultDisplay.className = 'result incorrect';
+                
+                const problemString = `${currentNum1} ${currentOperator} ${currentNum2}`;
+                answerHistory.unshift({ 
+                    problem: problemString, 
+                    userAnswer: 'No answer', 
+                    correct: false 
+                });
+                
+                if (answerHistory.length > MAX_HISTORY) {
+                    answerHistory.pop();
+                }
+                updateHistoryDisplay();
+                
+                setTimeout(() => {
+                    generateProblem();
+                }, 1500);
+            } else {
+                generateProblem();
+            }
         }
 
         function updateHistoryDisplay() {
@@ -244,7 +244,7 @@
                     <span class="history-problem">${item.problem} =</span>
                     <span class="history-answer">${item.userAnswer}</span>
                     <span class="${item.correct ? 'history-correct' : 'history-incorrect'}">
-                        ${item.correct ? '✓' : `✗ (${eval(item.problem)})`}
+                        ${item.correct ? '✓' : `✗ (${item.userAnswer === 'No answer' ? 'Skipped' : eval(item.problem)})`}
                     </span>
                 `;
                 historyList.appendChild(listItem);
