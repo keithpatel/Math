@@ -1,0 +1,113 @@
+<div class="problem-container">
+    <p class="problem"><span id="num1"></span> <span id="operator"></span> <span id="num2"></span> =</p>
+    <input type="number" id="answer" placeholder="Your answer">
+    <button onclick="checkAnswer()">Check Answer</button>
+    <p class="result" id="result"></p>
+</div>
+
+<button onclick="nextProblem()">Next Problem</button>
+
+<div class="history-container">
+    <h2 class="history-title">Last Answers</h2>
+    <ul class="history-list" id="history-list">
+        <!-- History items will be added here by JavaScript -->
+    </ul>
+</div>
+
+<script>
+    let num1Element = document.getElementById('num1');
+    let operatorElement = document.getElementById('operator');
+    let num2Element = document.getElementById('num2');
+    let answerInput = document.getElementById('answer');
+    let resultDisplay = document.getElementById('result');
+    let historyList = document.getElementById('history-list');
+
+    let currentNum1;
+    let currentNum2;
+    let currentOperator;
+    let correctAnswer;
+    const answerHistory = [];
+    const MAX_HISTORY = 20;
+
+    function generateProblem() {
+        currentNum1 = Math.floor(Math.random() * 99) + 1;
+        currentNum2 = Math.floor(Math.random() * 99) + 1;
+        const operators = ['+', '-'];
+        currentOperator = operators[(Math.floor(Math.random() * operators.length))];
+
+        num1Element.textContent = currentNum1;
+        operatorElement.textContent = currentOperator;
+        num2Element.textContent = currentNum2;
+        answerInput.value = '';
+        resultDisplay.textContent = '';
+        resultDisplay.className = 'result'; // Reset result class
+
+        if (currentOperator === '+') {
+            correctAnswer = currentNum1 + currentNum2;
+        } else if (currentOperator === '-') {
+            if (currentNum1 < currentNum2) {
+                let temp = currentNum1;
+                currentNum1 = currentNum2;
+                currentNum2 = temp;
+                num1Element.textContent = currentNum1;
+                num2Element.textContent = currentNum2;
+            }
+            correctAnswer = currentNum1 - currentNum2;
+        }
+    }
+
+    function checkAnswer() {
+        const userAnswer = parseInt(answerInput.value);
+        if (!isNaN(userAnswer)) {
+            const problemString = `${currentNum1} ${currentOperator} ${currentNum2}`;
+            const isCorrect = userAnswer === correctAnswer;
+
+            if (isCorrect) {
+                resultDisplay.textContent = "Correct!";
+                resultDisplay.className = 'result correct';
+            } else {
+                resultDisplay.textContent = `Incorrect. The correct answer is ${correctAnswer}.`;
+                resultDisplay.className = 'result incorrect';
+            }
+
+            // Add to history
+            answerHistory.unshift({ problem: problemString, userAnswer: userAnswer, correct: isCorrect });
+            if (answerHistory.length > MAX_HISTORY) {
+                answerHistory.pop();
+            }
+            updateHistoryDisplay();
+
+        } else {
+            resultDisplay.textContent = "Please enter a number.";
+            resultDisplay.className = 'result'; // Reset class if no number
+        }
+    }
+
+    function nextProblem() {
+        generateProblem();
+    }
+
+    function updateHistoryDisplay() {
+        historyList.innerHTML = ''; // Clear previous history
+        answerHistory.forEach(item => {
+            const listItem = document.createElement('li');
+            listItem.classList.add('history-item');
+            const problemSpan = document.createElement('span');
+            problemSpan.classList.add('history-problem');
+            problemSpan.textContent = item.problem + ' = ';
+            const answerSpan = document.createElement('span');
+            answerSpan.classList.add('history-answer');
+            answerSpan.textContent = item.userAnswer;
+            const resultSpan = document.createElement('span');
+            resultSpan.textContent = ` (${item.correct ? 'Correct' : 'Incorrect: ' + eval(item.problem)})`; // Use eval cautiously
+            resultSpan.classList.add(item.correct ? 'history-correct' : 'history-incorrect');
+
+            listItem.appendChild(problemSpan);
+            listItem.appendChild(answerSpan);
+            listItem.appendChild(resultSpan);
+            historyList.appendChild(listItem);
+        });
+    }
+
+    generateProblem();
+</script>
