@@ -1,113 +1,257 @@
-<div class="problem-container">
-    <p class="problem"><span id="num1"></span> <span id="operator"></span> <span id="num2"></span> =</p>
-    <input type="number" id="answer" placeholder="Your answer">
-    <button onclick="checkAnswer()">Check Answer</button>
-    <p class="result" id="result"></p>
-</div>
-
-<button onclick="nextProblem()">Next Problem</button>
-
-<div class="history-container">
-    <h2 class="history-title">Last Answers</h2>
-    <ul class="history-list" id="history-list">
-        <!-- History items will be added here by JavaScript -->
-    </ul>
-</div>
-
-<script>
-    let num1Element = document.getElementById('num1');
-    let operatorElement = document.getElementById('operator');
-    let num2Element = document.getElementById('num2');
-    let answerInput = document.getElementById('answer');
-    let resultDisplay = document.getElementById('result');
-    let historyList = document.getElementById('history-list');
-
-    let currentNum1;
-    let currentNum2;
-    let currentOperator;
-    let correctAnswer;
-    const answerHistory = [];
-    const MAX_HISTORY = 20;
-
-    function generateProblem() {
-        currentNum1 = Math.floor(Math.random() * 99) + 1;
-        currentNum2 = Math.floor(Math.random() * 99) + 1;
-        const operators = ['+', '-'];
-        currentOperator = operators[(Math.floor(Math.random() * operators.length))];
-
-        num1Element.textContent = currentNum1;
-        operatorElement.textContent = currentOperator;
-        num2Element.textContent = currentNum2;
-        answerInput.value = '';
-        resultDisplay.textContent = '';
-        resultDisplay.className = 'result'; // Reset result class
-
-        if (currentOperator === '+') {
-            correctAnswer = currentNum1 + currentNum2;
-        } else if (currentOperator === '-') {
-            if (currentNum1 < currentNum2) {
-                let temp = currentNum1;
-                currentNum1 = currentNum2;
-                currentNum2 = temp;
-                num1Element.textContent = currentNum1;
-                num2Element.textContent = currentNum2;
-            }
-            correctAnswer = currentNum1 - currentNum2;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Practice App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
-    }
 
-    function checkAnswer() {
-        const userAnswer = parseInt(answerInput.value);
-        if (!isNaN(userAnswer)) {
-            const problemString = `${currentNum1} ${currentOperator} ${currentNum2}`;
-            const isCorrect = userAnswer === correctAnswer;
+        .problem-container {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-            if (isCorrect) {
-                resultDisplay.textContent = "Correct!";
-                resultDisplay.className = 'result correct';
+        .problem {
+            font-size: 2.5em;
+            margin: 20px 0;
+            color: #2d3436;
+            font-weight: 300;
+        }
+
+        #answer {
+            font-size: 1.2em;
+            padding: 12px 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            width: 150px;
+            margin: 15px 0;
+            transition: border-color 0.3s ease;
+        }
+
+        #answer:focus {
+            outline: none;
+            border-color: #6c5ce7;
+        }
+
+        button {
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            margin: 5px;
+        }
+
+        button:hover {
+            background-color: #5b4bc4;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            font-size: 1.1em;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .history-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        .history-title {
+            color: #2d3436;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-problem {
+            color: #636e72;
+            font-weight: bold;
+        }
+
+        .history-answer {
+            color: #2d3436;
+            margin: 0 10px;
+        }
+
+        .history-correct {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .history-incorrect {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .problem {
+                font-size: 2em;
+            }
+            
+            .problem-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="problem-container">
+        <p class="problem">
+            <span id="num1"></span> 
+            <span id="operator"></span> 
+            <span id="num2"></span> =
+        </p>
+        <input type="number" id="answer" placeholder="Your answer">
+        <button onclick="checkAnswer()">Check Answer</button>
+        <p class="result" id="result"></p>
+    </div>
+
+    <button onclick="nextProblem()">Next Problem</button>
+
+    <div class="history-container">
+        <h2 class="history-title">Last Answers</h2>
+        <ul class="history-list" id="history-list"></ul>
+    </div>
+
+    <script>
+        let num1Element = document.getElementById('num1');
+        let operatorElement = document.getElementById('operator');
+        let num2Element = document.getElementById('num2');
+        let answerInput = document.getElementById('answer');
+        let resultDisplay = document.getElementById('result');
+        let historyList = document.getElementById('history-list');
+
+        let currentNum1;
+        let currentNum2;
+        let currentOperator;
+        let correctAnswer;
+        const answerHistory = [];
+        const MAX_HISTORY = 20;
+
+        function generateProblem() {
+            currentNum1 = Math.floor(Math.random() * 99) + 1;
+            currentNum2 = Math.floor(Math.random() * 99) + 1;
+            const operators = ['+', '-'];
+            currentOperator = operators[(Math.floor(Math.random() * operators.length))];
+
+            num1Element.textContent = currentNum1;
+            operatorElement.textContent = currentOperator;
+            num2Element.textContent = currentNum2;
+            answerInput.value = '';
+            resultDisplay.textContent = '';
+            resultDisplay.className = 'result';
+
+            if (currentOperator === '+') {
+                correctAnswer = currentNum1 + currentNum2;
+            } else if (currentOperator === '-') {
+                if (currentNum1 < currentNum2) {
+                    [currentNum1, currentNum2] = [currentNum2, currentNum1];
+                    num1Element.textContent = currentNum1;
+                    num2Element.textContent = currentNum2;
+                }
+                correctAnswer = currentNum1 - currentNum2;
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+            if (!isNaN(userAnswer)) {
+                const problemString = `${currentNum1} ${currentOperator} ${currentNum2}`;
+                const isCorrect = userAnswer === correctAnswer;
+
+                resultDisplay.textContent = isCorrect 
+                    ? "Correct!" 
+                    : `Incorrect. The correct answer is ${correctAnswer}.`;
+                resultDisplay.className = `result ${isCorrect ? 'correct' : 'incorrect'}`;
+
+                answerHistory.unshift({ 
+                    problem: problemString, 
+                    userAnswer: userAnswer, 
+                    correct: isCorrect 
+                });
+                
+                if (answerHistory.length > MAX_HISTORY) {
+                    answerHistory.pop();
+                }
+                updateHistoryDisplay();
             } else {
-                resultDisplay.textContent = `Incorrect. The correct answer is ${correctAnswer}.`;
-                resultDisplay.className = 'result incorrect';
+                resultDisplay.textContent = "Please enter a number.";
+                resultDisplay.className = 'result';
             }
-
-            // Add to history
-            answerHistory.unshift({ problem: problemString, userAnswer: userAnswer, correct: isCorrect });
-            if (answerHistory.length > MAX_HISTORY) {
-                answerHistory.pop();
-            }
-            updateHistoryDisplay();
-
-        } else {
-            resultDisplay.textContent = "Please enter a number.";
-            resultDisplay.className = 'result'; // Reset class if no number
         }
-    }
 
-    function nextProblem() {
+        function nextProblem() {
+            generateProblem();
+        }
+
+        function updateHistoryDisplay() {
+            historyList.innerHTML = '';
+            answerHistory.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.className = 'history-item';
+                
+                listItem.innerHTML = `
+                    <span class="history-problem">${item.problem} =</span>
+                    <span class="history-answer">${item.userAnswer}</span>
+                    <span class="${item.correct ? 'history-correct' : 'history-incorrect'}">
+                        ${item.correct ? '✓' : `✗ (${eval(item.problem)})`}
+                    </span>
+                `;
+                historyList.appendChild(listItem);
+            });
+        }
+
         generateProblem();
-    }
-
-    function updateHistoryDisplay() {
-        historyList.innerHTML = ''; // Clear previous history
-        answerHistory.forEach(item => {
-            const listItem = document.createElement('li');
-            listItem.classList.add('history-item');
-            const problemSpan = document.createElement('span');
-            problemSpan.classList.add('history-problem');
-            problemSpan.textContent = item.problem + ' = ';
-            const answerSpan = document.createElement('span');
-            answerSpan.classList.add('history-answer');
-            answerSpan.textContent = item.userAnswer;
-            const resultSpan = document.createElement('span');
-            resultSpan.textContent = ` (${item.correct ? 'Correct' : 'Incorrect: ' + eval(item.problem)})`; // Use eval cautiously
-            resultSpan.classList.add(item.correct ? 'history-correct' : 'history-incorrect');
-
-            listItem.appendChild(problemSpan);
-            listItem.appendChild(answerSpan);
-            listItem.appendChild(resultSpan);
-            historyList.appendChild(listItem);
-        });
-    }
-
-    generateProblem();
-</script>
+    </script>
+</body>
+</html>
