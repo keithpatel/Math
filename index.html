@@ -128,12 +128,10 @@
             <span id="operator"></span> 
             <span id="num2"></span> =
         </p>
-        <input type="number" id="answer" placeholder="Your answer">
+        <input type="number" id="answer" placeholder="Your answer" onkeydown="handleEnter(event)">
         <button onclick="checkAnswer()">Check Answer</button>
         <p class="result" id="result"></p>
     </div>
-
-    <button onclick="nextProblem()" style="margin-bottom: 10px;">Next Problem</button>
 
     <div class="history-container">
         <h2 class="history-title">Last Answers</h2>
@@ -165,6 +163,7 @@
             operatorElement.textContent = currentOperator;
             num2Element.textContent = currentNum2;
             answerInput.value = '';
+            answerInput.focus();
             resultDisplay.textContent = '';
             resultDisplay.className = 'result';
 
@@ -201,36 +200,19 @@
                     answerHistory.pop();
                 }
                 updateHistoryDisplay();
+
+                setTimeout(() => {
+                    generateProblem();
+                }, 1500); // Move to next problem after 1.5 seconds
             } else {
                 resultDisplay.textContent = "Please enter a number.";
                 resultDisplay.className = 'result';
             }
         }
 
-        function nextProblem() {
-            const userAnswer = answerInput.value.trim();
-            
-            if (userAnswer === '') {
-                resultDisplay.textContent = "No answer provided!";
-                resultDisplay.className = 'result incorrect';
-                
-                const problemString = `${currentNum1} ${currentOperator} ${currentNum2}`;
-                answerHistory.unshift({ 
-                    problem: problemString, 
-                    userAnswer: 'No answer', 
-                    correct: false 
-                });
-                
-                if (answerHistory.length > MAX_HISTORY) {
-                    answerHistory.pop();
-                }
-                updateHistoryDisplay();
-                
-                setTimeout(() => {
-                    generateProblem();
-                }, 1500);
-            } else {
-                generateProblem();
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                checkAnswer();
             }
         }
 
